@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 825" width="1200" height="825" role="img" aria-label="Preview of a booking and storefront website layout">
+  <defs>
+    <linearGradient id="w2bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b0b12"/><stop offset="1" stop-color="#101018"/>
+    </linearGradient>
+    <radialGradient id="w2glow" cx="14%" cy="90%" r="65%">
+      <stop offset="0" stop-color="#7c4dff" stop-opacity=".32"/><stop offset="1" stop-color="#7c4dff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="w2img" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7c4dff" stop-opacity=".34"/><stop offset="1" stop-color="#ffffff" stop-opacity=".07"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="825" fill="url(#w2bg)"/>
+  <rect width="1200" height="825" fill="url(#w2glow)"/>
+  <!-- top bar -->
+  <rect x="0" y="0" width="1200" height="104" fill="#fff" fill-opacity=".035"/>
+  <rect x="64" y="42" width="120" height="18" rx="9" fill="#fff" opacity=".85"/>
+  <g fill="#fff" opacity=".3">
+    <rect x="520" y="46" width="58" height="10" rx="5"/>
+    <rect x="600" y="46" width="72" height="10" rx="5"/>
+    <rect x="694" y="46" width="54" height="10" rx="5"/>
+  </g>
+  <rect x="990" y="34" width="146" height="36" rx="18" fill="#fff" fill-opacity=".1" stroke="#fff" stroke-opacity=".2"/>
+  <rect x="1020" y="47" width="86" height="10" rx="5" fill="#fff" opacity=".6"/>
+  <!-- hero split -->
+  <rect x="64" y="160" width="480" height="38" rx="10" fill="#fff" opacity=".9"/>
+  <rect x="64" y="214" width="360" height="38" rx="10" fill="#7c4dff" opacity=".7"/>
+  <rect x="64" y="286" width="420" height="12" rx="6" fill="#fff" opacity=".24"/>
+  <rect x="64" y="312" width="340" height="12" rx="6" fill="#fff" opacity=".24"/>
+  <rect x="64" y="364" width="210" height="50" rx="25" fill="#7c4dff"/>
+  <rect x="112" y="382" width="114" height="14" rx="7" fill="#fff" opacity=".9"/>
+  <!-- booking widget -->
+  <rect x="640" y="146" width="496" height="300" rx="22" fill="#fff" fill-opacity=".06" stroke="#fff" stroke-opacity=".13"/>
+  <rect x="676" y="184" width="160" height="14" rx="7" fill="#fff" opacity=".6"/>
+  <g fill="#fff" fill-opacity=".07" stroke="#fff" stroke-opacity=".12">
+    <rect x="676" y="222" width="200" height="46" rx="12"/>
+    <rect x="900" y="222" width="200" height="46" rx="12"/>
+    <rect x="676" y="286" width="424" height="46" rx="12"/>
+  </g>
+  <rect x="676" y="352" width="424" height="52" rx="26" fill="#7c4dff"/>
+  <rect x="826" y="372" width="124" height="14" rx="7" fill="#fff" opacity=".9"/>
+  <!-- gallery -->
+  <rect x="64" y="512" width="150" height="16" rx="8" fill="#fff" opacity=".55"/>
+  <g stroke="#fff" stroke-opacity=".1">
+    <rect x="64" y="562" width="256" height="204" rx="18" fill="url(#w2img)"/>
+    <rect x="344" y="562" width="256" height="204" rx="18" fill="url(#w2img)"/>
+    <rect x="624" y="562" width="256" height="204" rx="18" fill="url(#w2img)"/>
+    <rect x="904" y="562" width="232" height="204" rx="18" fill="url(#w2img)"/>
+  </g>
+  <g fill="#fff" opacity=".2">
+    <circle cx="192" cy="650" r="26"/><circle cx="472" cy="650" r="26"/>
+    <circle cx="752" cy="650" r="26"/><circle cx="1020" cy="650" r="26"/>
+  </g>
+</svg>
