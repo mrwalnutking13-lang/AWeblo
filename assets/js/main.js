@@ -213,7 +213,6 @@
         "Email: " + data.email,
         "Phone: " + (data.phone || "—"),
         "Project type: " + data.project,
-        "Budget: " + data.budget,
         "",
         "Details:",
         data.message

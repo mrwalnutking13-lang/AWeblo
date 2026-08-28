@@ -8,7 +8,7 @@ Open `index.html` and it runs.
 index.html                 the whole page
 assets/css/styles.css      design tokens + all styles
 assets/js/main.js          nav, scroll reveals, FAQ, form handling
-assets/img/logo.svg        AW monogram  (placeholder — swap for the real one)
+assets/img/logo.png        the AWeblo logo  (upload this — see below)
 ```
 
 ## Run it locally
@@ -23,12 +23,17 @@ python3 -m http.server 8000    # then open http://localhost:8000
 
 ### 1. The logo
 
-Replace `assets/img/logo.svg` with the real AW logo, keeping the same filename — it's
-referenced in six places (header, hero card, footer, favicon, apple-touch icon, social
-preview) and they'll all pick it up automatically.
+Upload your logo to `assets/img/` named exactly **`logo.png`**. Everything picks it up
+automatically — header, footer, browser tab icon, phone home-screen icon and the social
+share preview.
 
-Using a PNG instead? Drop it in `assets/img/` and find-and-replace `assets/img/logo.svg`
-with your filename in `index.html`. A square image works best.
+Upload it straight from GitHub:
+<https://github.com/mrwalnutking13-lang/AWeblo/upload/claude/aweblo-portfolio-site-v581i3/assets/img>
+
+(Or: repo → `assets/img` → **Add file** → **Upload files** → drag it in → **Commit changes**.)
+
+Until it's uploaded the logo spot is empty space — the "AWeblo" wordmark beside it still
+shows, so nothing looks broken.
 
 ### 2. The portfolio dropdowns
 

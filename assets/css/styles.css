@@ -444,43 +444,6 @@ h1, h2, h3, h4 {
 }
 .pill-row li:last-child::after { display: none; }
 
-/* ---------- 8. Marquee --------------------------------------------------- */
-.marquee {
-  border-block: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.014);
-  overflow: hidden;
-  padding-block: 1.15rem;
-  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-}
-.marquee__track {
-  display: flex;
-  width: max-content;
-  gap: 3rem;
-  animation: slide 34s linear infinite;
-}
-.marquee:hover .marquee__track { animation-play-state: paused; }
-.marquee__track span {
-  display: inline-flex;
-  align-items: center;
-  gap: 3rem;
-  font-family: var(--font-display);
-  font-size: clamp(0.8rem, 1.4vw, 0.95rem);
-  font-weight: 600;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  white-space: nowrap;
-}
-.marquee__track span::after {
-  content: "";
-  width: 5px;
-  height: 5px;
-  rotate: 45deg;
-  background: var(--brand);
-}
-@keyframes slide { to { transform: translateX(-50%); } }
-
 /* ---------- 9. Cards / services ------------------------------------------ */
 .card {
   position: relative;
@@ -779,6 +742,40 @@ h1, h2, h3, h4 {
 .deposit-strip h3 { font-size: 1.16rem; margin-bottom: 0.45rem; }
 .deposit-strip p { color: var(--text-dim); font-size: 0.95rem; }
 
+.terms {
+  margin-top: clamp(1rem, 2vw, 1.4rem);
+  padding: clamp(1.4rem, 2.5vw, 2rem);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.terms h3 { font-size: 1.08rem; margin-bottom: 0.9rem; }
+.terms ul { display: grid; gap: 0.6rem; }
+.terms li {
+  position: relative;
+  padding-left: 1.15rem;
+  font-size: 0.93rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+/* marker is positioned, not a flex item — flex would break the inline <strong> */
+.terms li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62rem;
+  width: 5px;
+  height: 5px;
+  rotate: 45deg;
+  background: var(--brand);
+}
+.terms strong { color: var(--text); font-weight: 600; }
+.terms__note {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+}
+
 /* ---------- 13. FAQ ------------------------------------------------------ */
 .faq { display: grid; gap: 0.8rem; max-width: 860px; margin-inline: auto; }
 .faq__item {
@@ -944,7 +941,7 @@ h1, h2, h3, h4 {
 }
 .footer-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
   gap: clamp(2rem, 4vw, 3rem);
 }
 .site-footer p { color: var(--text-dim); font-size: 0.93rem; max-width: 40ch; margin-top: 1rem; }
