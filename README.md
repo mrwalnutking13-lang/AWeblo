@@ -9,8 +9,6 @@ index.html                 the whole page
 assets/css/styles.css      design tokens + all styles
 assets/js/main.js          nav, scroll reveals, FAQ, form handling
 assets/img/logo.svg        AW monogram  (placeholder — swap for the real one)
-assets/img/work-01.svg     project 1 preview (placeholder)
-assets/img/work-02.svg     project 2 preview (placeholder)
 ```
 
 ## Run it locally
@@ -32,15 +30,18 @@ preview) and they'll all pick it up automatically.
 Using a PNG instead? Drop it in `assets/img/` and find-and-replace `assets/img/logo.svg`
 with your filename in `index.html`. A square image works best.
 
-### 2. The two portfolio projects
+### 2. The portfolio dropdowns
 
-In `index.html`, find the `WORK` section — there's a comment block marking exactly what to
-change. For each project:
+Each project is a dropdown: the row shows what the site is for, and opening it reveals the
+link. In `index.html`, find the `WORK` section — there's a comment block marking exactly
+what to change. Per project:
 
-- **Screenshot** — take a screenshot of the live site, save it to `assets/img/`, and point
-  the `<img src>` at it. Any wide-ish image works; it's cropped to 16:11.
-- **Links** — replace both `href="#"` links with the real site URL.
-- **Text** — update the domain in `<span class="url">`, the `<h3>`, the description and the tags.
+- **`.work-item__title`** — what the website is for (this is the row you see closed)
+- **`href="#"`** — the live site URL
+- **link text** — the domain you want displayed
+
+Two placeholders are in there now. To add more, copy a whole `<details class="work-item">`
+block and bump the `01` / `02` index.
 
 ### 3. The contact form
 
