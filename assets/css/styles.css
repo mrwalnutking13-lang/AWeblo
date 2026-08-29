@@ -648,20 +648,6 @@ h1, h2, h3, h4 {
 }
 .price-card:hover { transform: translateY(-5px); border-color: var(--brand-line); }
 
-.price-card__flag {
-  position: absolute;
-  top: -1px;
-  right: 1.6rem;
-  padding: 0.32rem 0.8rem;
-  border-radius: 0 0 10px 10px;
-  background: var(--brand);
-  color: #fff;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
 .price-card__icon {
   display: grid;
   place-items: center;
