@@ -105,10 +105,6 @@
       </a>
       <a class="btn btn--ghost btn--lg" href="#work">See recent work</a>
     </div>
-
-    <ul class="pill-row" data-reveal="4">
-      <li>Modern</li><li>Fast</li><li>Professional</li><li>Reliable</li>
-    </ul>
   </div>
 </section>
 
@@ -118,47 +114,49 @@
     <header class="section-head section-head--center">
       <p class="eyebrow" data-reveal="0">Recent work</p>
       <h2 class="section-title" data-reveal="1">Built recently for <span class="serif accent">real clients.</span></h2>
-      <p class="section-sub" data-reveal="2">Open one to visit the live site.</p>
+      <p class="section-sub" data-reveal="2">Open the list to see what I've built recently.</p>
     </header>
 
-    <!--
-      ┌──────────────────────────────────────────────────────────────────┐
-      │  PLACEHOLDER PROJECTS — swap in the real ones                    │
-      │  For each entry, change three things:                            │
-      │    1. .work-item__title  → what the website is for               │
-      │    2. href="#"           → the live site URL                     │
-      │    3. the link text      → the domain you want shown             │
-      │  Copy a whole <details> block to add more projects.              │
-      └──────────────────────────────────────────────────────────────────┘
-    -->
     <div class="work-list">
       <details class="work-item" data-reveal="0">
         <summary class="work-item__summary">
-          <span class="work-item__index">01</span>
-          <span class="work-item__title">Project One — website type goes here</span>
+          <span class="work-item__title">View recent client projects</span>
           <i class="work-item__chevron" aria-hidden="true"></i>
         </summary>
-        <div class="work-item__body">
-          <p>Short description of the build — what the client needed and what the site does.</p>
-          <a class="work-item__link" href="#" target="_blank" rel="noopener">
-            yourclientsite.com
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
-          </a>
-        </div>
-      </details>
 
-      <details class="work-item" data-reveal="1">
-        <summary class="work-item__summary">
-          <span class="work-item__index">02</span>
-          <span class="work-item__title">Project Two — website type goes here</span>
-          <i class="work-item__chevron" aria-hidden="true"></i>
-        </summary>
-        <div class="work-item__body">
-          <p>Short description of the build — what the client needed and what the site does.</p>
-          <a class="work-item__link" href="#" target="_blank" rel="noopener">
-            yourclientsite.com
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
-          </a>
+        <div class="work-panel__body">
+          <!--
+            ┌────────────────────────────────────────────────────────────────┐
+            │  TO ADD A PROJECT                                              │
+            │  Copy one whole <article class="project-card"> block below     │
+            │  and paste it after the last one. Then change four things:     │
+            │    1. .project-card__title  → the client or business name      │
+            │    2. .project-card__type   → what kind of site it is          │
+            │    3. .project-card__desc   → one line on what it does         │
+            │    4. href="#" + link text  → the live URL and the domain      │
+            │  The 01 / 02 numbering is automatic — never edit it by hand.   │
+            └────────────────────────────────────────────────────────────────┘
+          -->
+
+          <article class="project-card">
+            <h3 class="project-card__title">Project One</h3>
+            <p class="project-card__type">Website type goes here</p>
+            <p class="project-card__desc">Short description of the build — what the client needed and what the site does.</p>
+            <a class="work-item__link" href="#" target="_blank" rel="noopener">
+              yourclientsite.com
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+            </a>
+          </article>
+
+          <article class="project-card">
+            <h3 class="project-card__title">Project Two</h3>
+            <p class="project-card__type">Website type goes here</p>
+            <p class="project-card__desc">Short description of the build — what the client needed and what the site does.</p>
+            <a class="work-item__link" href="#" target="_blank" rel="noopener">
+              yourclientsite.com
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+            </a>
+          </article>
         </div>
       </details>
     </div>
@@ -284,16 +282,11 @@ Quoted individually, based on the size of the site. Here's the honest range.
       </details>
 
       <details class="faq__item" data-reveal="1">
-        <summary class="faq__q">Why is the price a range?<i aria-hidden="true"></i></summary>
-        <p class="faq__a">A simple one-page site and a full custom build aren't the same amount of work. You get one clear number before anything starts — no hourly surprises.</p>
-      </details>
-
-      <details class="faq__item" data-reveal="2">
         <summary class="faq__q">What if I don't like the design?<i aria-hidden="true"></i></summary>
         <p class="faq__a">You only pay the deposit <em>after</em> you've seen the rough design and you're happy with it. You're never paying for something you haven't seen.</p>
       </details>
 
-      <details class="faq__item" data-reveal="3">
+      <details class="faq__item" data-reveal="2">
         <summary class="faq__q">What happens if I stop paying the monthly fee?<i aria-hidden="true"></i></summary>
         <p class="faq__a">Hosting, maintenance and support run only while the monthly fee is paid. If you cancel, I stop paying for your hosting and turn off support. If you paid for the build upfront, I hand over your site files so you can host it somewhere else.</p>
       </details>
