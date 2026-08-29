@@ -823,15 +823,17 @@ h1, h2, h3, h4 {
   align-items: center;
   gap: 1rem;
   padding: 1rem 1.2rem;
-  border: 1px solid var(--line);
+  border: 1px solid var(--brand-line);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.028);
+  background: rgba(124, 77, 255, 0.08);
+  box-shadow: 0 18px 40px -28px rgba(124, 77, 255, 0.75);
   transition: transform 0.35s var(--ease), border-color 0.35s var(--ease), background-color 0.35s var(--ease);
 }
-.quick-action:hover {
+/* only the link cards lift on hover — the others hold still so the buttons
+   inside them stay easy to hit */
+a.quick-action:hover {
   transform: translateX(4px);
-  border-color: var(--brand-line);
-  background: rgba(124, 77, 255, 0.09);
+  background: rgba(124, 77, 255, 0.14);
 }
 .quick-action__icon {
   display: grid;
@@ -871,6 +873,27 @@ h1, h2, h3, h4 {
 }
 a.quick-action { -webkit-tap-highlight-color: rgba(124, 77, 255, 0.25); }
 a.quick-action:active { background: rgba(124, 77, 255, 0.16); transform: scale(0.995); }
+
+.quick-action__actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-left: auto; }
+.quick-action__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.42rem 0.9rem;
+  border: 1px solid var(--brand-line);
+  border-radius: 999px;
+  background: rgba(124, 77, 255, 0.18);
+  color: var(--brand-bright);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: rgba(124, 77, 255, 0.3);
+  transition: background-color 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.quick-action__btn:hover { background: rgba(124, 77, 255, 0.3); transform: translateY(-1px); }
+.quick-action__btn:active { transform: scale(0.96); }
+.quick-action__btn svg { width: 13px; height: 13px; flex: none; }
 
 .contact-note {
   display: flex;
@@ -1056,7 +1079,9 @@ a.quick-action:active { background: rgba(124, 77, 255, 0.16); transform: scale(0
   .quick-action strong { font-size: 0.88rem; }
   .quick-action__arrow { display: none; }
   .quick-action__hint { display: block; }
-  a.quick-action { border-color: var(--brand-line); background: rgba(124, 77, 255, 0.08); }
+  .quick-action--split { flex-wrap: wrap; }
+  .quick-action--split .quick-action__actions { width: 100%; margin-left: 0; margin-top: 0.15rem; gap: 0.5rem; }
+  .quick-action__btn { flex: 1; justify-content: center; padding: 0.6rem 0.9rem; font-size: 0.85rem; }
   .contact-note { font-size: 0.86rem; padding: 0.85rem 0.9rem; }
   .form__foot { flex-direction: column; align-items: stretch; gap: 0.8rem; }
   .form__note { text-align: center; }
