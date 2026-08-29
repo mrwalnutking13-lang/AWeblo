@@ -859,6 +859,35 @@ h1, h2, h3, h4 {
 .quick-action__arrow { flex: none; margin-left: auto; color: var(--text-faint); transition: transform 0.35s var(--ease), color 0.35s var(--ease); }
 .quick-action:hover .quick-action__arrow { color: var(--brand-bright); transform: translateX(3px); }
 
+/* "Tap to call" style hints — mobile only, where there is no hover to reveal
+   that these cards are actually links. */
+.quick-action__hint {
+  display: none;
+  margin-top: 0.2rem;
+  font-family: var(--font-body);
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: var(--brand-bright);
+}
+a.quick-action { -webkit-tap-highlight-color: rgba(124, 77, 255, 0.25); }
+a.quick-action:active { background: rgba(124, 77, 255, 0.16); transform: scale(0.995); }
+
+.contact-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--brand-line);
+  border-radius: 14px;
+  background: var(--brand-soft);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+.contact-note svg { width: 17px; height: 17px; flex: none; margin-top: 3px; color: var(--brand-bright); }
+.contact-note strong { color: var(--text); font-weight: 600; }
+
 /* Form */
 .form { display: grid; gap: 1rem; }
 .field { display: grid; gap: 0.45rem; }
@@ -1026,6 +1055,9 @@ h1, h2, h3, h4 {
   .quick-action span { font-size: 0.66rem; letter-spacing: 0.12em; }
   .quick-action strong { font-size: 0.88rem; }
   .quick-action__arrow { display: none; }
+  .quick-action__hint { display: block; }
+  a.quick-action { border-color: var(--brand-line); background: rgba(124, 77, 255, 0.08); }
+  .contact-note { font-size: 0.86rem; padding: 0.85rem 0.9rem; }
   .form__foot { flex-direction: column; align-items: stretch; gap: 0.8rem; }
   .form__note { text-align: center; }
   .btn--lg { padding: 1rem 1.2rem; font-size: 0.95rem; }
