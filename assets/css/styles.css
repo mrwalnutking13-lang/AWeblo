@@ -638,20 +638,15 @@ h1, h2, h3, h4 {
   display: flex;
   flex-direction: column;
   padding: clamp(1.7rem, 2.6vw, 2.3rem);
-  border: 1px solid var(--line);
+  border: 1px solid var(--brand-line);
   border-radius: 24px;
-  background: linear-gradient(170deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.012));
+  background: linear-gradient(170deg, rgba(124, 77, 255, 0.16), rgba(124, 77, 255, 0.03) 55%, rgba(255, 255, 255, 0.012));
+  box-shadow: 0 40px 90px -50px rgba(124, 77, 255, 0.9);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   transition: transform 0.45s var(--ease), border-color 0.45s var(--ease), box-shadow 0.45s var(--ease);
 }
 .price-card:hover { transform: translateY(-5px); border-color: var(--brand-line); }
-
-.price-card--feature {
-  border-color: var(--brand-line);
-  background: linear-gradient(170deg, rgba(124, 77, 255, 0.16), rgba(124, 77, 255, 0.03) 55%, rgba(255, 255, 255, 0.012));
-  box-shadow: 0 40px 90px -50px rgba(124, 77, 255, 0.9);
-}
 
 .price-card__flag {
   position: absolute;
@@ -741,40 +736,6 @@ h1, h2, h3, h4 {
 .deposit-strip__icon svg { width: 27px; height: 27px; }
 .deposit-strip h3 { font-size: 1.16rem; margin-bottom: 0.45rem; }
 .deposit-strip p { color: var(--text-dim); font-size: 0.95rem; }
-
-.terms {
-  margin-top: clamp(1rem, 2vw, 1.4rem);
-  padding: clamp(1.4rem, 2.5vw, 2rem);
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.02);
-}
-.terms h3 { font-size: 1.08rem; margin-bottom: 0.9rem; }
-.terms ul { display: grid; gap: 0.6rem; }
-.terms li {
-  position: relative;
-  padding-left: 1.15rem;
-  font-size: 0.93rem;
-  color: var(--text-dim);
-  line-height: 1.55;
-}
-/* marker is positioned, not a flex item — flex would break the inline <strong> */
-.terms li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.62rem;
-  width: 5px;
-  height: 5px;
-  rotate: 45deg;
-  background: var(--brand);
-}
-.terms strong { color: var(--text); font-weight: 600; }
-.terms__note {
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  color: var(--text-faint);
-}
 
 /* ---------- 13. FAQ ------------------------------------------------------ */
 .faq { display: grid; gap: 0.8rem; max-width: 860px; margin-inline: auto; }
@@ -869,9 +830,18 @@ h1, h2, h3, h4 {
   color: var(--brand-bright);
 }
 .quick-action__icon svg { width: 19px; height: 19px; }
+/* the text column must be allowed to shrink, or long values push past the card */
+.quick-action > div { min-width: 0; }
 .quick-action span { display: block; font-size: 0.74rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); }
-.quick-action strong { font-family: var(--font-display); font-size: 1.02rem; font-weight: 600; letter-spacing: -0.01em; }
-.quick-action__arrow { margin-left: auto; color: var(--text-faint); transition: transform 0.35s var(--ease), color 0.35s var(--ease); }
+.quick-action strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+}
+.quick-action__arrow { flex: none; margin-left: auto; color: var(--text-faint); transition: transform 0.35s var(--ease), color 0.35s var(--ease); }
 .quick-action:hover .quick-action__arrow { color: var(--brand-bright); transform: translateX(3px); }
 
 /* Form */
@@ -1025,7 +995,6 @@ h1, h2, h3, h4 {
   .nav, .header-actions .btn { display: none; }
   .nav-toggle { display: grid; }
   .grid--3, .contact__grid, .footer-grid { grid-template-columns: minmax(0, 1fr); }
-  .price-card--feature { order: -1; }
 }
 
 @media (max-width: 620px) {
@@ -1034,6 +1003,17 @@ h1, h2, h3, h4 {
   .form__row { grid-template-columns: minmax(0, 1fr); }
   .deposit-strip { grid-template-columns: minmax(0, 1fr); }
   .btn { width: 100%; }
+  .contact { border-radius: 22px; }
+  .quick-actions { margin-top: 1.5rem; }
+  .quick-action { gap: 0.7rem; padding: 0.85rem 0.9rem; }
+  .quick-action__icon { width: 34px; height: 34px; }
+  .quick-action__icon svg { width: 17px; height: 17px; }
+  .quick-action span { font-size: 0.66rem; letter-spacing: 0.12em; }
+  .quick-action strong { font-size: 0.88rem; }
+  .quick-action__arrow { display: none; }
+  .form__foot { flex-direction: column; align-items: stretch; gap: 0.8rem; }
+  .form__note { text-align: center; }
+  .btn--lg { padding: 1rem 1.2rem; font-size: 0.95rem; }
   .work-item__summary { padding: 1rem 1.1rem; gap: 0.8rem; }
   .work-item__title { font-size: 0.95rem; }
   .work-item__body { padding: 0 1.1rem 1.1rem; }
