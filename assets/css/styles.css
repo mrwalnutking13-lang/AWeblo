@@ -616,15 +616,6 @@ h1, h2, h3, h4 {
 }
 .project-card .work-item__link { margin-top: 0.45rem; }
 
-.work-note {
-  margin-top: 2rem;
-  font-size: 0.9rem;
-  color: var(--text-faint);
-  text-align: center;
-  text-wrap: balance;
-}
-.work-note a { white-space: nowrap; }
-
 /* ---------- 11. Process -------------------------------------------------- */
 .steps {
   display: grid;
