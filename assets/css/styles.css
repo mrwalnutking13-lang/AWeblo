@@ -40,9 +40,6 @@
   --radius: 10px;
   --radius-sm: 8px;
 
-  /* Elevation — neutral and shallow, never coloured */
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-
   /* Motion */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --dur: 0.2s;
@@ -86,16 +83,7 @@ ul, ol { list-style: none; padding: 0; }
 
 ::selection { background: rgba(124, 77, 255, 0.35); color: #fff; }
 
-/* A single, very quiet wash of brand at the top of the page. Enough to tie
-   the palette together, far short of the old ambient light show. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: radial-gradient(1200px 560px at 50% -18%, rgba(124, 77, 255, 0.06), transparent 68%);
-  pointer-events: none;
-}
+/* No ambient wash, no texture overlay — the page background is flat. */
 
 /* ---------- 3. Layout primitives ---------------------------------------- */
 .shell {
@@ -591,7 +579,6 @@ h1, h2, h3, h4 {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--bg-elev);
-  box-shadow: var(--shadow);
   transition: border-color var(--dur) var(--ease);
 }
 .price-card:hover { border-color: var(--line-strong); }
@@ -707,7 +694,6 @@ h1, h2, h3, h4 {
   border-radius: var(--radius);
   padding: clamp(1.7rem, 3.5vw, 2.9rem);
   background: var(--bg-elev);
-  box-shadow: var(--shadow);
 }
 .contact__grid {
   display: grid;
@@ -849,7 +835,7 @@ a.quick-action:active { background: rgba(255, 255, 255, 0.06); }
   outline: none;
   border-color: var(--brand);
   background: rgba(255, 255, 255, 0.045);
-  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(124, 77, 255, 0.45);
 }
 .field.has-error input, .field.has-error textarea, .field.has-error select { border-color: #f87171; }
 .field__error { font-size: 0.78rem; color: #fca5a5; min-height: 0; display: none; }
