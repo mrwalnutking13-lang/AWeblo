@@ -28,7 +28,7 @@ automatically — header, footer, browser tab icon, phone home-screen icon and t
 share preview.
 
 Upload it straight from GitHub:
-<https://github.com/mrwalnutking13-lang/AWeblo/upload/claude/aweblo-portfolio-site-v581i3/assets/img>
+<https://github.com/mrwalnutking13-lang/AWeblo/upload/main/assets/img>
 
 (Or: repo → `assets/img` → **Add file** → **Upload files** → drag it in → **Commit changes**.)
 
