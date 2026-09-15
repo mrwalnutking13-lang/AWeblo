@@ -25,10 +25,6 @@
   var toggle = $(".nav-toggle");
   var drawer = $(".mobile-nav");
   if (toggle && drawer) {
-    $$("a", drawer).forEach(function (link, i) {
-      link.style.transitionDelay = 0.06 * i + 0.05 + "s";
-    });
-
     var setDrawer = function (open) {
       toggle.setAttribute("aria-expanded", String(open));
       drawer.classList.toggle("is-open", open);
@@ -67,7 +63,7 @@
 
       pending.forEach(function (el) {
         var stagger = el.getAttribute("data-reveal");
-        if (stagger) el.style.setProperty("--delay", parseFloat(stagger) * 0.09 + "s");
+        if (stagger) el.style.setProperty("--delay", parseFloat(stagger) * 0.05 + "s");
       });
 
       var ticking = false;
@@ -114,17 +110,6 @@
       });
     }, { rootMargin: "-45% 0px -50% 0px" });
     sections.forEach(function (section) { spy.observe(section); });
-  }
-
-  /* ---- Pointer sheen on cards ------------------------------------------- */
-  if (!reduceMotion && window.matchMedia("(hover: hover)").matches) {
-    $$(".card").forEach(function (card) {
-      card.addEventListener("pointermove", function (e) {
-        var rect = card.getBoundingClientRect();
-        card.style.setProperty("--mx", ((e.clientX - rect.left) / rect.width) * 100 + "%");
-        card.style.setProperty("--my", ((e.clientY - rect.top) / rect.height) * 100 + "%");
-      });
-    });
   }
 
   /* ---- FAQ: one open at a time ------------------------------------------ */
