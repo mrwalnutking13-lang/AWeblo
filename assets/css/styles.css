@@ -10,15 +10,21 @@
    ------------------------------------------------------------------------ */
 :root {
   /* Surfaces
-     The page sits on a moving starfield, so panels tint *down* into the dark
-     rather than filming white over it: same small contrast against the
-     background, but stars stop glinting through behind body copy. */
+     The page sits on a moving starfield, so every panel is a tinted pane of
+     glass rather than a solid black box: the galaxy shows through, and the
+     blur behind it (--panel-blur) smears the stars out so body copy keeps
+     its contrast. Change the alpha values below to make the whole site more
+     or less see-through — the blur is what keeps text readable, so lower the
+     alpha before you lower the blur. */
   --bg: #050507;
-  --bg-elev: #0a0a0e;
-  --card: rgba(9, 8, 18, 0.66);
-  --card-hover: rgba(19, 16, 34, 0.74);
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.14);
+  --bg-elev: rgba(10, 10, 16, 0.46);
+  --card: rgba(9, 8, 18, 0.42);
+  --card-hover: rgba(22, 18, 40, 0.54);
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.17);
+
+  /* The frosting applied to every translucent panel. */
+  --panel-blur: blur(14px) saturate(118%);
 
   /* Ink — the dim tone runs a touch brighter than it would on flat black,
      to hold its contrast over the backdrop. */
@@ -47,6 +53,21 @@
   /* Motion */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --dur: 0.2s;
+}
+
+/* Without backdrop-filter there is nothing smearing the stars out behind the
+   panels, so the panes go back to tinting most of the sky out instead. Text
+   contrast is the point — better a darker box than an unreadable one. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --bg-elev: rgba(10, 10, 16, 0.86);
+    --card: rgba(9, 8, 18, 0.82);
+    --card-hover: rgba(22, 18, 40, 0.88);
+  }
+  .btn--ghost { background: rgba(14, 12, 26, 0.82); }
+  .site-header.is-stuck { background: rgba(5, 5, 7, 0.95); }
+  .mobile-nav { background: rgba(5, 5, 7, 0.98); }
+  .to-top { background: rgba(10, 10, 14, 0.92); }
 }
 
 /* ---------- 2. Reset ----------------------------------------------------- */
@@ -258,8 +279,13 @@ h1, h2, h3, h4 {
 .btn--primary:hover { background: #6b3ff0; border-color: #6b3ff0; }
 .btn--primary:active { background: #5d33e0; border-color: #5d33e0; }
 
-.btn--ghost { background: rgba(14, 12, 26, 0.6); color: var(--text); }
-.btn--ghost:hover { background: rgba(26, 22, 44, 0.72); border-color: var(--line-strong); }
+.btn--ghost {
+  background: rgba(14, 12, 26, 0.34);
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
+  color: var(--text);
+}
+.btn--ghost:hover { background: rgba(26, 22, 44, 0.48); border-color: var(--line-strong); }
 
 .btn--block { width: 100%; }
 .btn--lg { padding: 0.95rem 1.6rem; font-size: 0.96rem; }
@@ -276,9 +302,9 @@ h1, h2, h3, h4 {
 }
 .site-header.is-stuck {
   padding-block: 0.65rem;
-  background: rgba(5, 5, 7, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(5, 5, 7, 0.66);
+  backdrop-filter: blur(16px) saturate(118%);
+  -webkit-backdrop-filter: blur(16px) saturate(118%);
   border-bottom-color: var(--line);
 }
 
@@ -371,9 +397,9 @@ h1, h2, h3, h4 {
   align-content: center;
   gap: 0.15rem;
   padding: 6rem var(--gutter) 3rem;
-  background: rgba(5, 5, 7, 0.98);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(5, 5, 7, 0.82);
+  backdrop-filter: blur(22px) saturate(118%);
+  -webkit-backdrop-filter: blur(22px) saturate(118%);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.25s var(--ease), visibility 0.25s;
@@ -445,6 +471,8 @@ h1, h2, h3, h4 {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--card);
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
   transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
 }
 .card:hover {
@@ -483,6 +511,8 @@ h1, h2, h3, h4 {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--card);
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
   overflow: hidden;
   transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
 }
@@ -576,7 +606,7 @@ h1, h2, h3, h4 {
   padding: 1.1rem 1.2rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: rgba(8, 7, 16, 0.6);
+  background: rgba(255, 255, 255, 0.035);
   transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
 }
 .project-card:hover { border-color: var(--line-strong); background: var(--card-hover); }
@@ -626,6 +656,8 @@ h1, h2, h3, h4 {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--card);
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
   transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
 }
 .step:hover { border-color: var(--line-strong); background: var(--card-hover); }
@@ -656,6 +688,8 @@ h1, h2, h3, h4 {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--bg-elev);
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
   transition: border-color var(--dur) var(--ease);
 }
 .price-card:hover { border-color: var(--line-strong); }
@@ -723,6 +757,8 @@ h1, h2, h3, h4 {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--card);
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
   overflow: hidden;
   transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
 }
@@ -771,6 +807,8 @@ h1, h2, h3, h4 {
   border-radius: var(--radius);
   padding: clamp(1.7rem, 3.5vw, 2.9rem);
   background: var(--bg-elev);
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
 }
 .contact__grid {
   display: grid;
@@ -991,9 +1029,9 @@ a.quick-action:active { background: rgba(255, 255, 255, 0.06); }
   height: 42px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--line-strong);
-  background: rgba(10, 10, 14, 0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(10, 10, 14, 0.58);
+  backdrop-filter: blur(14px) saturate(118%);
+  -webkit-backdrop-filter: blur(14px) saturate(118%);
   color: var(--text);
   cursor: pointer;
   opacity: 0;
