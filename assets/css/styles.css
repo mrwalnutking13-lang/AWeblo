@@ -738,56 +738,7 @@ h1, h2, h3, h4 {
 
 .price-card .btn { margin-top: auto; }
 
-/* ---------- 13. FAQ ------------------------------------------------------ */
-.faq { display: grid; gap: 0.7rem; max-width: 840px; margin-inline: auto; }
-.faq__item {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--card);
-  backdrop-filter: var(--panel-blur);
-  -webkit-backdrop-filter: var(--panel-blur);
-  overflow: hidden;
-  transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
-}
-.faq__item[open], .faq__item:hover { border-color: var(--line-strong); background: var(--card-hover); }
-
-.faq__q {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.2rem;
-  padding: 1.1rem 1.3rem;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: 0.99rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  list-style: none;
-}
-.faq__q::-webkit-details-marker { display: none; }
-.faq__q i {
-  position: relative;
-  flex: none;
-  width: 18px;
-  height: 18px;
-  transition: rotate var(--dur) var(--ease);
-}
-.faq__q i::before, .faq__q i::after {
-  content: "";
-  position: absolute;
-  inset: 50% 1px;
-  height: 1.5px;
-  border-radius: 1px;
-  background: var(--text-dim);
-  translate: 0 -50%;
-}
-.faq__q i::after { rotate: 90deg; transition: opacity 0.15s var(--ease); }
-.faq__item[open] .faq__q i::before { background: var(--brand-bright); }
-.faq__item[open] .faq__q i::after { opacity: 0; }
-
-.faq__a { padding: 0 1.3rem 1.25rem; color: var(--text-dim); font-size: 0.95rem; max-width: 68ch; }
-
-/* ---------- 14. Contact -------------------------------------------------- */
+/* ---------- 13. Contact -------------------------------------------------- */
 .contact {
   position: relative;
   border: 1px solid var(--line);
@@ -959,7 +910,7 @@ a.quick-action:active { background: rgba(255, 255, 255, 0.06); }
 .form__status.is-visible { display: flex; }
 .form__status svg { width: 17px; height: 17px; flex: none; margin-top: 3px; color: #4ade80; }
 
-/* ---------- 15. Footer --------------------------------------------------- */
+/* ---------- 14. Footer --------------------------------------------------- */
 .site-footer {
   position: relative;
   background: linear-gradient(180deg, transparent, rgba(5, 5, 7, 0.6) 55%);
@@ -1030,7 +981,7 @@ a.quick-action:active { background: rgba(255, 255, 255, 0.06); }
 .to-top:hover { border-color: var(--brand); background: rgba(124, 77, 255, 0.16); }
 .to-top svg { width: 17px; height: 17px; }
 
-/* ---------- 16. Scroll reveal -------------------------------------------- */
+/* ---------- 15. Scroll reveal -------------------------------------------- */
 [data-reveal] {
   opacity: 0;
   translate: 0 10px;

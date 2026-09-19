@@ -112,15 +112,6 @@
     sections.forEach(function (section) { spy.observe(section); });
   }
 
-  /* ---- FAQ: one open at a time ------------------------------------------ */
-  var faqItems = $$(".faq__item");
-  faqItems.forEach(function (item) {
-    item.addEventListener("toggle", function () {
-      if (!item.open) return;
-      faqItems.forEach(function (other) { if (other !== item) other.open = false; });
-    });
-  });
-
   /* ---- Back to top ------------------------------------------------------ */
   var toTopBtn = $(".to-top");
   if (toTopBtn) {

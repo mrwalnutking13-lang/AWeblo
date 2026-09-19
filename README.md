@@ -7,7 +7,7 @@ Open `index.html` and it runs.
 ```
 index.html                 the whole page
 assets/css/styles.css      design tokens + all styles
-assets/js/main.js          nav, scroll reveals, FAQ, form handling
+assets/js/main.js          nav, scroll reveals, form handling
 assets/js/galaxy.js        the 3D galaxy backdrop
 assets/img/logo.png        the AWeblo logo  (upload this — see below)
 ```
@@ -75,7 +75,7 @@ Colors, fonts and spacing are all CSS custom properties at the top of `styles.cs
 
 ### How see-through the panels are
 
-Cards, the pricing and contact panels, the FAQ rows, the header and the back-to-top button
+Cards, the portfolio rows, the pricing and contact panels, the header and the back-to-top button
 are all tinted glass rather than solid boxes: the galaxy shows through, and a blur behind
 each one (`--panel-blur`) smears the stars out so the text keeps its contrast. To dial the
 effect, raise or lower the alpha on `--card`, `--card-hover` and `--bg-elev` in `:root`.
