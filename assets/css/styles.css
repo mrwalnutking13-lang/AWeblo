@@ -890,6 +890,43 @@ a.quick-action:active { background: rgba(255, 255, 255, 0.06); }
   background: rgba(255, 255, 255, 0.045);
   box-shadow: 0 0 0 2px rgba(124, 77, 255, 0.45);
 }
+/* Autofill: the browser paints its own pale background and near-black text
+   into any field it fills, which on a dark form lands as a white slab. There
+   is no way to simply turn that background off — it arrives from the browser's
+   own stylesheet and outranks ours — so it gets covered instead, with an inset
+   shadow big enough to fill the field in the colour the field already renders
+   at over the panel. -webkit-text-fill-color carries the typed text back to
+   normal ink, since plain `color` is overridden too, and caret-color keeps the
+   cursor visible.
+
+   The border has to be opaque here. An inset shadow stops at the padding edge,
+   so it never reaches under the border, and the usual translucent white line
+   would sit directly over the browser's pale fill and read as a bright outline.
+   #3c3b41 is what that line already composites to on a field that was typed
+   into, so the two match. */
+.field input:-webkit-autofill,
+.field input:-webkit-autofill:hover,
+.field select:-webkit-autofill,
+.field select:-webkit-autofill:hover,
+.field textarea:-webkit-autofill,
+.field textarea:-webkit-autofill:hover {
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+  border-color: #3c3b41;
+  -webkit-box-shadow: 0 0 0 40rem #121119 inset;
+  box-shadow: 0 0 0 40rem #121119 inset;
+}
+/* Focused, the field lightens and takes the brand ring — the ring is a real
+   box-shadow, so it has to be re-stated alongside the fill or one replaces the
+   other, and the brand border likewise. */
+.field input:-webkit-autofill:focus,
+.field select:-webkit-autofill:focus,
+.field textarea:-webkit-autofill:focus {
+  border-color: var(--brand);
+  -webkit-box-shadow: 0 0 0 40rem #191821 inset, 0 0 0 2px rgba(124, 77, 255, 0.45);
+  box-shadow: 0 0 0 40rem #191821 inset, 0 0 0 2px rgba(124, 77, 255, 0.45);
+}
+
 .field.has-error input, .field.has-error textarea, .field.has-error select { border-color: #f87171; }
 .field__error { font-size: 0.78rem; color: #fca5a5; min-height: 0; display: none; }
 .field.has-error .field__error { display: block; }
