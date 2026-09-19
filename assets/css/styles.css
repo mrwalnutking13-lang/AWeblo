@@ -98,8 +98,15 @@ ul, ol { list-style: none; padding: 0; }
    ---------------------------------------------------------------------- */
 .galaxy {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: -1;
+  /* Pinned to the *large* viewport: the height a phone has once the address
+     bar has slid away. Sized in vh the layer would resize as the bar comes
+     and goes, and the sky would reshuffle mid-scroll. */
+  height: 100vh;
+  height: 100lvh;
   overflow: hidden;
   pointer-events: none;
   contain: strict;

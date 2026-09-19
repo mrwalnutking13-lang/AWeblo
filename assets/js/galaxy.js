@@ -63,12 +63,32 @@
 
   var clock = 0, last = 0, raf = 0, running = false;
   var quality = 1;          /* trimmed automatically if frames run long */
+  var qualityNow = 1;       /* what is actually drawn, eased toward quality */
   var slowFrames = 0, fastFrames = 0;
+  var perfDt = 0.016;       /* rolling average frame time, seconds */
 
-  /* ---- Small helpers ----------------------------------------------------- */
-  function gauss() {
+  /* ---- Small helpers -----------------------------------------------------
+
+     The dust texture is drawn from a seeded generator rather than
+     Math.random, so when it has to be repainted at a different resolution
+     it comes back as the same galaxy, just sharper or softer. Dealing it
+     afresh would swap one arm pattern for another mid-scroll.
+     ---------------------------------------------------------------------- */
+  var SEED = (Math.random() * 4294967296) >>> 0;
+
+  function seeded(a) {
+    return function () {
+      a = a + 0x6d2b79f5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function gauss(rand) {
     /* Sum of uniforms: close enough to normal, far cheaper than Box-Muller. */
-    return (Math.random() + Math.random() + Math.random() - 1.5) * 0.9;
+    var r = rand || Math.random;
+    return (r() + r() + r() - 1.5) * 0.9;
   }
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
   function nowMs() {
@@ -109,8 +129,8 @@
   /* Where a particle sits in the disc, in polar form. Both the texture and
      the live particle layer call this, which is what keeps the painted arms
      and the moving points on the same spiral. */
-  function armAngle(index, t) {
-    return (index % ARMS) * (Math.PI * 2 / ARMS) + t * SWIRL + gauss() * (0.24 - 0.12 * t);
+  function armAngle(index, t, rand) {
+    return (index % ARMS) * (Math.PI * 2 / ARMS) + t * SWIRL + gauss(rand) * (0.24 - 0.12 * t);
   }
 
   /* ---- The disc texture --------------------------------------------------
@@ -127,6 +147,9 @@
      texture stays up until the new one is finished.
      ---------------------------------------------------------------------- */
   function planDisc(px, narrow) {
+    /* Same seed every time, so a repaint at a new size reproduces this
+       galaxy rather than inventing a different one. */
+    var rand = seeded(SEED);
     var tex = document.createElement("canvas");
     tex.width = tex.height = px;
     var g = tex.getContext("2d");
@@ -142,11 +165,11 @@
     steps.push(function () {
       var clouds = Math.round(px / (narrow ? 18 : 9));
       for (var c = 0; c < clouds; c++) {
-        var ct = Math.pow(Math.random(), 0.7);
-        var ca = armAngle(c, ct) + gauss() * 0.22;
+        var ct = Math.pow(rand(), 0.7);
+        var ca = armAngle(c, ct, rand) + gauss(rand) * 0.22;
         var cr = unit * ct;
-        var csz = unit * (0.05 + Math.random() * 0.14);
-        g.globalAlpha = (narrow ? 0.03 : 0.04) + Math.random() * (narrow ? 0.04 : 0.06);
+        var csz = unit * (0.05 + rand() * 0.14);
+        g.globalAlpha = (narrow ? 0.03 : 0.04) + rand() * (narrow ? 0.04 : 0.06);
         g.drawImage(
           NEBULA_SPRITES[c % NEBULA_SPRITES.length],
           half + Math.cos(ca) * cr - csz,
@@ -172,10 +195,10 @@
         g.fillStyle = pass.color;
         g.globalAlpha = 1;
         for (var d = 0; d < count; d++) {
-          var t = Math.pow(Math.random(), 0.58);
-          var a = armAngle(d, t) + gauss() * 0.1 * pass.spread;
-          var r = unit * t * (1 + gauss() * 0.03);
-          var sz = Math.random() < 0.82 ? 1 : 2;
+          var t = Math.pow(rand(), 0.58);
+          var a = armAngle(d, t, rand) + gauss(rand) * 0.1 * pass.spread;
+          var r = unit * t * (1 + gauss(rand) * 0.03);
+          var sz = rand() < 0.82 ? 1 : 2;
           g.fillRect(half + Math.cos(a) * r, half + Math.sin(a) * r, sz, sz);
         }
       };
@@ -195,8 +218,8 @@
         g.fillStyle = "rgba(124, 77, 255, 0.13)";
         g.globalAlpha = 1;
         for (var i = 0; i < count; i++) {
-          var ht = Math.pow(Math.random(), 0.8);
-          var ha = Math.random() * Math.PI * 2;
+          var ht = Math.pow(rand(), 0.8);
+          var ha = rand() * Math.PI * 2;
           g.fillRect(half + Math.cos(ha) * unit * ht, half + Math.sin(ha) * unit * ht, 1, 1);
         }
       };
@@ -228,17 +251,24 @@
     if (discJob.at >= discJob.steps.length) {
       disc = discJob.canvas;
       discJob = null;
+      /* Reveal only now: fading the canvas in while the dust was still being
+         laid down meant the first thing seen was a half-built galaxy. */
+      canvas.classList.add("is-ready");
     }
   }
 
-  /* ---- Scene construction ------------------------------------------------ */
+  /* ---- Scene construction ------------------------------------------------
+     Disc geometry is stored as fractions of the disc radius, not in world
+     units, so a resize only rescales the same galaxy. Rebuilding the arrays
+     would deal a whole new set of random positions, which on screen is the
+     sky flickering into a different sky.
+     ---------------------------------------------------------------------- */
   function build() {
     var area = W * H;
     /* Plenty of small particles beats a few large ones: the arms only read
-       as arms when the points stay points. */
-    /* The phone floor is high for the viewport area because the disc covers
-       far more than the viewport there — the count follows the disc, not the
-       window. */
+       as arms when the points stay points. The phone floor is high for the
+       viewport area because the disc covers far more than the viewport
+       there — the count follows the disc, not the window. */
     var discCount = Math.round(clamp(area / 1400, narrowView ? 680 : 460, 1300));
     /* A phone has little viewport area, and the old ratio left the sky above
        the galaxy almost bare, so the floor is high enough to keep stars in
@@ -249,50 +279,12 @@
        through the projection to get the disc's size in world units. */
     R = discRadius * (GALAXY_Z / FOCAL);
 
-    galaxy = new Array(discCount);
-    for (var i = 0; i < discCount; i++) {
-      /* Three populations: a bright central bulge, the spiral arms, and a
-         loose scatter that fills the space between the arms so the disc
-         doesn't look like two bare ribbons. */
-      var kind = i < discCount * 0.15 ? "bulge" : (i % 10 < 7 ? "arm" : "field");
-      var t, ang, rad, thickness;
-
-      if (kind === "bulge") {
-        t = Math.pow(Math.random(), 1.8) * 0.18;
-        rad = R * t;
-        ang = Math.random() * Math.PI * 2;
-        thickness = R * 0.05;
-      } else if (kind === "arm") {
-        t = Math.pow(Math.random(), 0.55);
-        rad = R * t * (1 + gauss() * 0.035);
-        /* Arm angle winds with radius; the scatter loosens toward the rim. */
-        ang = armAngle(i, t);
-        thickness = R * 0.032 * (1 - 0.6 * t);
-      } else {
-        t = Math.pow(Math.random(), 0.75);
-        rad = R * t;
-        ang = Math.random() * Math.PI * 2;
-        thickness = R * 0.05 * (1 - 0.5 * t);
-      }
-
-      /* Colour by radius: white heart, lilac mid, violet arms, rare magenta. */
-      var tone;
-      if (t < 0.12) tone = Math.random() < 0.8 ? 0 : 1;
-      else if (t < 0.4) tone = Math.random() < 0.5 ? 1 : 2;
-      else tone = Math.random() < 0.1 ? 4 : (Math.random() < 0.5 ? 2 : 3);
-
-      var faint = kind === "field";
-      galaxy[i] = {
-        r: rad,
-        a: ang,
-        z: gauss() * thickness,
-        size: (kind === "bulge" ? 2.4 : faint ? 1.8 : 2.2) + Math.random() * (faint ? 3 : 5),
-        alpha: (kind === "bulge" ? 0.66 : faint ? 0.26 : 0.52) + Math.random() * (faint ? 0.3 : 0.45),
-        tone: tone,
-        tw: Math.random() * Math.PI * 2,
-        twRate: 0.5 + Math.random() * 1.4
-      };
-    }
+    /* Only deal new particles when the count really has to change. A quarter
+       either way covers an address bar sliding away or a window nudged at
+       the edge — neither is worth a new sky. */
+    if (Math.abs(galaxy.length - discCount) > discCount * 0.25) buildDiscParticles(discCount);
+    if (Math.abs(stars.length - starCount) > starCount * 0.25) buildStars(starCount);
+    if (!nebulae.length) buildNebulae();
 
     /* Match the texture to the size the disc is actually drawn at, so its
        specks stay roughly one for one with screen pixels instead of being
@@ -305,21 +297,76 @@
       discJob = planDisc(wantPx, narrowView);
       if (reduceMotion) advanceDisc(0);
     }
+  }
 
-    /* Field stars drift toward the camera and recycle out the back. */
-    stars = new Array(starCount);
-    for (var s = 0; s < starCount; s++) stars[s] = makeStar(true);
+  function buildDiscParticles(count) {
+    /* Seeded like the texture: if the count ever does have to change, the
+       points land back on the same spiral rather than scattering anew. */
+    var rand = seeded(SEED ^ 0x9e3779b9);
+    galaxy = new Array(count);
+    for (var i = 0; i < count; i++) {
+      /* Three populations: a bright central bulge, the spiral arms, and a
+         loose scatter that fills the space between the arms so the disc
+         doesn't look like two bare ribbons. */
+      var kind = i < count * 0.15 ? "bulge" : (i % 10 < 7 ? "arm" : "field");
+      var t, ang, rad, thickness;
 
-    /* A few soft clouds riding in the disc plane, for volume behind the dust. */
+      if (kind === "bulge") {
+        t = Math.pow(rand(), 1.8) * 0.18;
+        rad = t;
+        ang = rand() * Math.PI * 2;
+        thickness = 0.05;
+      } else if (kind === "arm") {
+        t = Math.pow(rand(), 0.55);
+        rad = t * (1 + gauss(rand) * 0.035);
+        /* Arm angle winds with radius; the scatter loosens toward the rim. */
+        ang = armAngle(i, t, rand);
+        thickness = 0.032 * (1 - 0.6 * t);
+      } else {
+        t = Math.pow(rand(), 0.75);
+        rad = t;
+        ang = rand() * Math.PI * 2;
+        thickness = 0.05 * (1 - 0.5 * t);
+      }
+
+      /* Colour by radius: white heart, lilac mid, violet arms, rare magenta. */
+      var tone;
+      if (t < 0.12) tone = rand() < 0.8 ? 0 : 1;
+      else if (t < 0.4) tone = rand() < 0.5 ? 1 : 2;
+      else tone = rand() < 0.1 ? 4 : (rand() < 0.5 ? 2 : 3);
+
+      var faint = kind === "field";
+      galaxy[i] = {
+        /* r and z are fractions of the disc radius, scaled at draw time. */
+        r: rad,
+        a: ang,
+        z: gauss(rand) * thickness,
+        size: (kind === "bulge" ? 2.4 : faint ? 1.8 : 2.2) + rand() * (faint ? 3 : 5),
+        alpha: (kind === "bulge" ? 0.66 : faint ? 0.26 : 0.52) + rand() * (faint ? 0.3 : 0.45),
+        tone: tone,
+        tw: rand() * Math.PI * 2,
+        twRate: 0.5 + rand() * 1.4
+      };
+    }
+  }
+
+  /* Field stars drift toward the camera and recycle out the back. They live
+     in world units, independent of the viewport, so a resize leaves them be. */
+  function buildStars(count) {
+    var old = stars.length;
+    stars.length = count;
+    for (var i = old; i < count; i++) stars[i] = makeStar(true);
+  }
+
+  /* A few soft clouds riding in the disc plane, for volume behind the dust. */
+  function buildNebulae() {
     nebulae = [];
     for (var n = 0; n < 7; n++) {
-      var na = Math.random() * Math.PI * 2;
-      var nr = R * (0.16 + Math.random() * 0.72);
       nebulae.push({
-        r: nr,
-        a: na,
-        z: gauss() * R * 0.05,
-        size: R * (0.3 + Math.random() * 0.42),
+        r: 0.16 + Math.random() * 0.72,
+        a: Math.random() * Math.PI * 2,
+        z: gauss() * 0.05,
+        size: 0.3 + Math.random() * 0.42,
         alpha: 0.16 + Math.random() * 0.2,
         sprite: NEBULA_SPRITES[n % NEBULA_SPRITES.length]
       });
@@ -340,10 +387,16 @@
     };
   }
 
-  /* ---- Sizing ------------------------------------------------------------ */
+  /* ---- Sizing ------------------------------------------------------------
+     Measured from the layer itself, never from window.innerHeight. On a
+     phone the address bar slides away as you scroll, which changes
+     innerHeight and used to rebuild the whole scene mid-scroll — the sky
+     visibly reshuffled under the page. The layer is pinned to the large
+     viewport in CSS, so its own box does not move when the bar does.
+     ---------------------------------------------------------------------- */
   function resize() {
-    var w = window.innerWidth;
-    var h = window.innerHeight;
+    var w = canvas.clientWidth || window.innerWidth;
+    var h = canvas.clientHeight || window.innerHeight;
     /* Cap the pixel ratio — a full 3x buffer costs far more than it adds —
        but not so hard that the sky goes soft on a phone screen, where the
        backdrop now fills the whole viewport. */
@@ -363,10 +416,11 @@
     galY = narrowView ? -0.1 : GAL_Y;
     discTilt = narrowView ? 0.8 : TILT;
     discRadius = Math.max(w, h) * (narrowView ? 0.72 : 0.66);
+    /* Only the backing buffer is set here. The element's own size comes from
+       the stylesheet; writing it in pixels here would freeze the layout and
+       the layer would stop following the viewport. */
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
-    canvas.style.width = w + "px";
-    canvas.style.height = h + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     build();
@@ -384,11 +438,15 @@
   }
 
   function onScroll() {
-    var doc = document.documentElement;
-    var max = Math.max(1, doc.scrollHeight - window.innerHeight);
-    var p = clamp(window.scrollY / max, 0, 1);
     /* Scrolling pans the camera down the field and eases it back a touch, so
-       the sky keeps moving with the page instead of sitting flat behind it. */
+       the sky keeps moving with the page instead of sitting flat behind it.
+
+       This used to be a fraction of the page height, which meant the same
+       scroll position mapped to a different camera the moment anything
+       changed that height — a dropdown opening, or the address bar sliding
+       away — and the sky lurched. It now depends on the scroll offset alone,
+       easing toward its limit so there is no end to hit. */
+    var p = 1 - Math.exp(-window.scrollY / 2400);
     scroll.y = p * 620;
     scroll.z = p * 320;
     syncTarget();
@@ -456,7 +514,7 @@
     /* --- Field stars ---
        Every star keeps moving even when quality is trimmed, so thinning the
        field never makes the remaining stars jump. */
-    var drawStars = Math.round(stars.length * quality);
+    var drawStars = Math.round(stars.length * qualityNow);
     for (var s = 0; s < stars.length; s++) {
       var st = stars[s];
       st.z -= dt * 26;
@@ -517,13 +575,15 @@
     }
 
     /* --- Nebula clouds, riding in the disc plane for a little volume --- */
-    for (var n = 0; quality > 0.7 && n < nebulae.length; n++) {
+    /* Faded out with quality rather than switched off at a threshold. */
+    var cloudGain = clamp((qualityNow - 0.55) / 0.25, 0, 1);
+    for (var n = 0; cloudGain > 0.01 && n < nebulae.length; n++) {
       var neb = nebulae[n];
-      var np = placeDisc(neb.r, neb.a + theta, neb.z);
+      var np = placeDisc(neb.r * R, neb.a + theta, neb.z * R);
       if (!np) continue;
-      var nsz = neb.size * np.k;
+      var nsz = neb.size * R * np.k;
       if (nsz < 4) continue;
-      ctx.globalAlpha = neb.alpha * clamp(np.k * 1.5, 0, 1);
+      ctx.globalAlpha = neb.alpha * cloudGain * clamp(np.k * 1.5, 0, 1);
       ctx.drawImage(neb.sprite, np.sx - nsz, np.sy - nsz, nsz * 2, nsz * 2);
     }
 
@@ -546,10 +606,10 @@
     }
 
     /* --- Disc particles --- */
-    var count = Math.round(galaxy.length * quality);
+    var count = Math.round(galaxy.length * qualityNow);
     for (var i = 0; i < count; i++) {
       var g = galaxy[i];
-      var gp = placeDisc(g.r, g.a + theta, g.z);
+      var gp = placeDisc(g.r * R, g.a + theta, g.z * R);
       if (!gp) continue;
       if (gp.sx < -60 || gp.sx > W + 60 || gp.sy < -60 || gp.sy > H + 60) continue;
       g.tw += dt * g.twRate;
@@ -609,12 +669,13 @@
   /* ---- Loop -------------------------------------------------------------- */
   function frame(now) {
     raf = window.requestAnimationFrame(frame);
-    var dt = (now - last) / 1000;
+    var raw = (now - last) / 1000;
     last = now;
     /* A tab that was backgrounded hands back a huge delta — clamp it so the
-       galaxy resumes where it was rather than jumping a minute forward. */
-    if (!(dt > 0)) return;
-    if (dt > 0.05) dt = 0.05;
+       galaxy resumes where it was rather than jumping a minute forward. The
+       unclamped figure is kept for the performance average below. */
+    if (!(raw > 0)) return;
+    var dt = raw > 0.05 ? 0.05 : raw;
 
     /* Keep any pending texture build ticking over, a slice at a time. */
     advanceDisc(5);
@@ -623,15 +684,27 @@
 
     /* Adaptive detail, measured on the frame interval rather than on our own
        script time: on a weak device the cost usually lands in rasterising,
-       which a timer around draw() would never see. Two seconds of frames
-       slower than ~38fps thins the scene; ten smooth seconds give it back. */
-    if (dt > 0.026) {
-      slowFrames++; fastFrames = 0;
-      if (slowFrames > 60 && quality > 0.4) { quality -= 0.15; slowFrames = 0; }
-    } else {
-      fastFrames++; slowFrames = 0;
-      if (fastFrames > 600 && quality < 1) { quality = Math.min(1, quality + 0.1); fastFrames = 0; }
+       which a timer around draw() would never see.
+
+       It reads a rolling average, not single frames, and only once the page
+       has settled. Judging frame by frame from the first paint, the ordinary
+       jank of a page loading was enough to start stripping the sky, and a
+       display running happily at 30fps was treated as a device in trouble —
+       which is backwards for a backdrop that only drifts. The floor is 0.6,
+       since past that the thinning shows more than the stutter it saves. */
+    if (clock > 2) {
+      perfDt += (Math.min(raw, 0.2) - perfDt) * 0.05;
+      if (perfDt > 0.045) {          /* sustained worse than ~22fps */
+        slowFrames++; fastFrames = 0;
+        if (slowFrames > 90 && quality > 0.6) { quality -= 0.2; slowFrames = 0; }
+      } else if (perfDt < 0.03) {    /* comfortably above 33fps */
+        fastFrames++; slowFrames = 0;
+        if (fastFrames > 240 && quality < 1) { quality = Math.min(1, quality + 0.1); fastFrames = 0; }
+      }
     }
+    /* Ease into the new level. Applied straight, a step in the count pops a
+       slice of the sky in or out in a single frame. */
+    qualityNow += (quality - qualityNow) * 0.02;
   }
 
   function start() {
@@ -649,13 +722,25 @@
 
   /* ---- Wiring ------------------------------------------------------------ */
   var resizeTimer = 0;
-  window.addEventListener("resize", function () {
+  function onResize() {
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(function () {
+      var w = canvas.clientWidth || window.innerWidth;
+      var h = canvas.clientHeight || window.innerHeight;
+      if (w === W && h === H) return;   /* nothing actually moved */
       resize();
       if (reduceMotion) draw(0);
     }, 180);
-  }, { passive: true });
+  }
+
+  /* Watch the layer's own box. A window resize listener also hears the
+     address bar sliding away on a phone, which is not a resize of anything
+     we draw. */
+  if (window.ResizeObserver) {
+    new ResizeObserver(onResize).observe(canvas);
+  } else {
+    window.addEventListener("resize", onResize, { passive: true });
+  }
 
   document.addEventListener("visibilitychange", function () {
     if (document.hidden) stop(); else start();
@@ -680,6 +765,8 @@
 
   resize();
   onScroll();
-  canvas.classList.add("is-ready");
   applyMotionPreference();
+  /* If the build somehow never finishes — a tab backgrounded before it got
+     going — show what there is rather than leaving the canvas hidden. */
+  window.setTimeout(function () { canvas.classList.add("is-ready"); }, 4000);
 })();
