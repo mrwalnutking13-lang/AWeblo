@@ -5,18 +5,22 @@
 
 /* ---------- 1. Tokens ---------------------------------------------------- */
 :root {
-  /* Surfaces */
-  --bg: #07070a;
-  --bg-elev: #0b0b11;
-  --card: rgba(255, 255, 255, 0.026);
-  --card-hover: rgba(255, 255, 255, 0.045);
-  --line: rgba(255, 255, 255, 0.09);
-  --line-strong: rgba(255, 255, 255, 0.16);
+  /* Surfaces
+     Panels sit on a moving starfield, so they tint *down* into the dark
+     instead of lightening: that keeps body copy on a settled ground and
+     stops stars glinting through behind text. */
+  --bg: #05040c;
+  --bg-elev: #0a0817;
+  --card: rgba(11, 8, 24, 0.72);
+  --card-hover: rgba(26, 18, 52, 0.80);
+  --line: rgba(255, 255, 255, 0.10);
+  --line-strong: rgba(255, 255, 255, 0.17);
 
-  /* Ink */
-  --text: #f4f4f7;
-  --text-dim: #a2a2b2;
-  --text-faint: #6e6e80;
+  /* Ink — dim tones run a touch brighter than on flat black to hold
+     contrast over the backdrop. */
+  --text: #f5f4fa;
+  --text-dim: #b3b2c6;
+  --text-faint: #7d7c92;
 
   /* Brand */
   --brand: #7c4dff;
@@ -79,15 +83,15 @@ ul, ol { list-style: none; padding: 0; }
 
 ::selection { background: rgba(124, 77, 255, 0.4); color: #fff; }
 
-/* Ambient page glow */
+/* Ambient page glow — sits above the galaxy canvas and ties it to the page */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(1000px 640px at 50% -10%, rgba(124, 77, 255, 0.17), transparent 62%),
-    radial-gradient(700px 520px at 6% 26%, rgba(124, 77, 255, 0.07), transparent 60%),
+    radial-gradient(1000px 640px at 50% -10%, rgba(124, 77, 255, 0.15), transparent 62%),
+    radial-gradient(700px 520px at 6% 26%, rgba(124, 77, 255, 0.06), transparent 60%),
     radial-gradient(900px 700px at 50% 108%, rgba(124, 77, 255, 0.10), transparent 60%);
   pointer-events: none;
 }
@@ -104,7 +108,76 @@ body::after {
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse 90% 70% at 50% 22%, #000 20%, transparent 78%);
   -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 22%, #000 20%, transparent 78%);
+  opacity: 0.6;
   pointer-events: none;
+}
+
+/* ---------- 2b. Galaxy backdrop -----------------------------------------
+   Three stacked layers behind everything: the animated canvas, a static
+   CSS sky that covers it when JavaScript never runs, and a veil that
+   darkens the sky under the content so type keeps its contrast.
+
+   The wrapper is positioned with a z-index, so it makes its own stacking
+   context — its children order among themselves and the whole thing stays
+   behind the page.
+   ---------------------------------------------------------------------- */
+.galaxy {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.galaxy__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease);
+}
+.galaxy__canvas.is-ready { opacity: 1; }
+
+/* No-JS sky: a still nebula with a couple of hand-placed star clusters.
+   It fades out the moment the canvas takes over. */
+.galaxy__fallback {
+  position: absolute;
+  inset: -10%;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(214, 196, 255, 0.5) 0%, rgba(157, 123, 255, 0.22) 12%, transparent 46%),
+    radial-gradient(ellipse 62% 30% at 50% 34%, rgba(124, 77, 255, 0.3), transparent 70%),
+    radial-gradient(ellipse 40% 22% at 26% 44%, rgba(178, 96, 255, 0.16), transparent 72%),
+    radial-gradient(ellipse 44% 20% at 74% 26%, rgba(96, 52, 214, 0.2), transparent 72%),
+    radial-gradient(1.6px 1.6px at 12% 18%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1.4px 1.4px at 78% 12%, rgba(226, 214, 255, 0.8), transparent),
+    radial-gradient(1.8px 1.8px at 62% 62%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1.3px 1.3px at 30% 74%, rgba(196, 170, 255, 0.75), transparent),
+    radial-gradient(1.5px 1.5px at 88% 68%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.2px 1.2px at 8% 56%, rgba(214, 196, 255, 0.7), transparent),
+    radial-gradient(1.4px 1.4px at 44% 8%, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(1.1px 1.1px at 20% 38%, rgba(226, 214, 255, 0.6), transparent),
+    radial-gradient(1.6px 1.6px at 92% 34%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1.2px 1.2px at 54% 88%, rgba(214, 196, 255, 0.6), transparent),
+    radial-gradient(1.5px 1.5px at 70% 46%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1.1px 1.1px at 36% 22%, rgba(196, 170, 255, 0.55), transparent),
+    radial-gradient(1.3px 1.3px at 84% 82%, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(1.2px 1.2px at 16% 90%, rgba(226, 214, 255, 0.5), transparent);
+  transition: opacity 1.2s var(--ease);
+}
+.galaxy__canvas.is-ready ~ .galaxy__fallback { opacity: 0; }
+
+/* Readability veil: darkest right under the hero headline and along the
+   bottom where the content gets dense, open through the middle band so the
+   arms still show. */
+.galaxy__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 58% 38% at 50% 32%, rgba(5, 4, 12, 0.5), rgba(5, 4, 12, 0.16) 62%, transparent 80%),
+    linear-gradient(180deg, rgba(5, 4, 12, 0.6) 0%, rgba(5, 4, 12, 0.2) 28%, rgba(5, 4, 12, 0.34) 62%, rgba(5, 4, 12, 0.66) 100%),
+    radial-gradient(farthest-corner at 50% 50%, transparent 42%, rgba(2, 1, 6, 0.72) 100%);
 }
 
 /* ---------- 3. Layout primitives ---------------------------------------- */
@@ -232,7 +305,12 @@ h1, h2, h3, h4 {
 .btn--primary:hover { box-shadow: 0 16px 42px -12px rgba(124, 77, 255, 0.95); }
 .btn--primary:hover::after { opacity: 1; }
 
-.btn--ghost { background: rgba(255, 255, 255, 0.03); color: var(--text); }
+.btn--ghost {
+  background: rgba(16, 11, 36, 0.62);
+  color: var(--text);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
 .btn--ghost:hover {
   background: rgba(255, 255, 255, 0.07);
   border-color: var(--brand-line);
@@ -253,7 +331,7 @@ h1, h2, h3, h4 {
 }
 .site-header.is-stuck {
   padding-block: 0.6rem;
-  background: rgba(7, 7, 10, 0.78);
+  background: rgba(5, 4, 12, 0.82);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
   border-bottom-color: var(--line);
@@ -348,7 +426,7 @@ h1, h2, h3, h4 {
   align-content: center;
   gap: 0.4rem;
   padding: 6rem var(--gutter) 3rem;
-  background: rgba(7, 7, 10, 0.97);
+  background: rgba(5, 4, 12, 0.96);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   opacity: 0;
@@ -580,10 +658,10 @@ h1, h2, h3, h4 {
   padding: 1.15rem 1.25rem;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.022);
+  background: rgba(8, 6, 20, 0.62);
   transition: border-color 0.4s var(--ease), background-color 0.4s var(--ease);
 }
-.project-card:hover { border-color: var(--brand-line); background: rgba(124, 77, 255, 0.06); }
+.project-card:hover { border-color: var(--brand-line); background: rgba(46, 26, 96, 0.68); }
 
 .project-card::before {
   counter-increment: project;
@@ -660,7 +738,9 @@ h1, h2, h3, h4 {
   padding: clamp(1.7rem, 2.6vw, 2.3rem);
   border: 1px solid var(--brand-line);
   border-radius: 24px;
-  background: linear-gradient(170deg, rgba(124, 77, 255, 0.16), rgba(124, 77, 255, 0.03) 55%, rgba(255, 255, 255, 0.012));
+  background:
+    linear-gradient(170deg, rgba(124, 77, 255, 0.18), rgba(124, 77, 255, 0.04) 55%, rgba(255, 255, 255, 0.012)),
+    rgba(10, 7, 26, 0.72);
   box-shadow: 0 40px 90px -50px rgba(124, 77, 255, 0.9);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -779,7 +859,10 @@ h1, h2, h3, h4 {
   padding: clamp(1.8rem, 4vw, 3.2rem);
   background:
     radial-gradient(700px 340px at 12% 0%, rgba(124, 77, 255, 0.16), transparent 62%),
-    linear-gradient(170deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.012));
+    linear-gradient(170deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.012)),
+    rgba(8, 6, 20, 0.7);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   overflow: hidden;
 }
 .contact__grid {
@@ -917,7 +1000,7 @@ a.quick-action:active { background: rgba(124, 77, 255, 0.16); transform: scale(0
   background-size: 15px;
   padding-right: 2.6rem;
 }
-.field select option { background: #101017; }
+.field select option { background: #0c0a1c; }
 .field input::placeholder, .field textarea::placeholder { color: var(--text-faint); }
 .field input:focus, .field select:focus, .field textarea:focus {
   outline: none;
@@ -947,6 +1030,8 @@ a.quick-action:active { background: rgba(124, 77, 255, 0.16); transform: scale(0
 
 /* ---------- 15. Footer --------------------------------------------------- */
 .site-footer {
+  position: relative;
+  background: linear-gradient(180deg, transparent, rgba(5, 4, 12, 0.6) 55%);
   border-top: 1px solid var(--line);
   margin-top: var(--section-y);
   padding-block: clamp(2.5rem, 5vw, 4rem) 2rem;
@@ -1004,7 +1089,7 @@ a.quick-action:active { background: rgba(124, 77, 255, 0.16); transform: scale(0
   height: 46px;
   border-radius: 50%;
   border: 1px solid var(--line-strong);
-  background: rgba(12, 12, 18, 0.86);
+  background: rgba(10, 8, 22, 0.88);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: var(--text);
@@ -1074,4 +1159,15 @@ a.quick-action:active { background: rgba(124, 77, 255, 0.16); transform: scale(0
     transition-duration: 0.01ms !important;
   }
   [data-reveal] { opacity: 1; translate: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The galaxy still renders — the script paints one still frame and stops,
+     so the backdrop is there without any drift, spin or twinkle. */
+  .galaxy__canvas { opacity: 1; }
+}
+
+@media print {
+  .galaxy { display: none; }
+  body::before, body::after { display: none; }
 }
