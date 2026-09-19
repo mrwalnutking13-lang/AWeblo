@@ -626,19 +626,6 @@ h1, h2, h3, h4 {
   font-size: 1.04rem;
   font-weight: 600;
 }
-.project-card__type {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--brand-bright);
-}
-.project-card__desc {
-  color: var(--text-dim);
-  font-size: 0.93rem;
-  line-height: 1.55;
-  max-width: 62ch;
-}
 .project-card .work-item__link { margin-top: 0.5rem; }
 
 /* ---------- 11. Process -------------------------------------------------- */

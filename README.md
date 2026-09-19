@@ -38,12 +38,11 @@ shows, so nothing looks broken.
 
 ### 2. The portfolio dropdowns
 
-The Recent Work row opens to a list of project cards. In `index.html`, find the `WORK`
-section — there's a comment block marking exactly what to change. Per project:
+The Recent Work row opens to a list of project cards — each one is just a name and the
+live link. In `index.html`, find the `WORK` section — there's a comment block marking
+exactly what to change. Per project:
 
 - **`.project-card__title`** — the client or business name
-- **`.project-card__type`** — what kind of site it is
-- **`.project-card__desc`** — one line on what the site does
 - **`href`** + link text — the live URL and the domain you want displayed
 
 Two live projects are in there now. To add more, copy a whole
