@@ -1054,6 +1054,18 @@ a.quick-action:active { background: rgba(255, 255, 255, 0.06); }
   [data-reveal] { opacity: 1; translate: none; }
 }
 
+@media (max-width: 720px) {
+  /* On a phone the galaxy is small, sharp and sits in the open space below
+     the hero buttons rather than sprawling behind the text, so the veil can
+     ease off and let it show. */
+  .galaxy__veil {
+    background:
+      radial-gradient(ellipse 72% 24% at 50% 17%, rgba(5, 5, 7, 0.4), transparent 78%),
+      linear-gradient(180deg, rgba(5, 5, 7, 0.36) 0%, rgba(5, 5, 7, 0.08) 24%, rgba(5, 5, 7, 0.24) 58%, rgba(5, 5, 7, 0.6) 100%),
+      radial-gradient(farthest-corner at 50% 45%, transparent 52%, rgba(2, 2, 4, 0.66) 100%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* The galaxy still renders — the script paints one still frame and stops,
      so the backdrop is there without any drift, spin or twinkle. */

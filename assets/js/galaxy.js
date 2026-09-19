@@ -33,11 +33,15 @@
   var GAL_X = 0.24;
   var GAL_Y = -0.1;
   var galX = GAL_X, galY = GAL_Y;
+  /* Resolved per viewport in resize(): a phone gets its own framing. */
+  var discTilt = TILT;
+  var discRadius = 0;       /* the disc's radius on screen, in CSS pixels */
+  var narrowView = false;
   var SPIN = 0.052;         /* radians per second, shared by every layer */
 
   var W = 0, H = 0, cx = 0, cy = 0, dpr = 1;
   var galaxy = [], stars = [], nebulae = [];
-  var disc = null, discPx = 0;
+  var disc = null, discPx = 0, discNarrow = false;
   var R = 1200;             /* disc radius in world units */
   var streak = null, nextStreak = 6;
 
@@ -116,7 +120,7 @@
      disc's rotation and tilt. The live particles layer on top for the
      genuine depth and twinkle.
      ---------------------------------------------------------------------- */
-  function buildDisc(px) {
+  function buildDisc(px, narrow) {
     var tex = document.createElement("canvas");
     tex.width = tex.height = px;
     var g = tex.getContext("2d");
@@ -124,14 +128,16 @@
     var unit = half * 0.98;        /* disc radius in texels */
     g.globalCompositeOperation = "lighter";
 
-    /* Nebulous wash, hugging the arms. */
-    var clouds = Math.round(px / 9);
+    /* Nebulous wash, hugging the arms. It is the soft, smoky part, so on a
+       phone — where the disc is small and every pixel counts — there is much
+       less of it and the dust does the work instead. */
+    var clouds = Math.round(px / (narrow ? 18 : 9));
     for (var c = 0; c < clouds; c++) {
       var ct = Math.pow(Math.random(), 0.7);
       var ca = armAngle(c, ct) + gauss() * 0.22;
       var cr = unit * ct;
       var csz = unit * (0.05 + Math.random() * 0.14);
-      g.globalAlpha = 0.04 + Math.random() * 0.06;
+      g.globalAlpha = (narrow ? 0.03 : 0.04) + Math.random() * (narrow ? 0.04 : 0.06);
       g.drawImage(
         NEBULA_SPRITES[c % NEBULA_SPRITES.length],
         half + Math.cos(ca) * cr - csz,
@@ -149,7 +155,7 @@
       { color: "rgba(112, 62, 232, 0.36)", share: 0.24, spread: 1.4 },
       { color: "rgba(198, 104, 255, 0.3)", share: 0.08, spread: 1.25 }
     ];
-    var total = Math.round(px * 18);
+    var total = Math.round(px * (narrow ? 26 : 18));
     for (var pIdx = 0; pIdx < passes.length; pIdx++) {
       var pass = passes[pIdx];
       g.fillStyle = pass.color;
@@ -170,7 +176,7 @@
 
     /* Inter-arm haze so the gaps between the arms aren't bare. */
     g.fillStyle = "rgba(124, 77, 255, 0.13)";
-    var haze = Math.round(px * 3.5);
+    var haze = Math.round(px * (narrow ? 1.6 : 3.5));
     for (var hI = 0; hI < haze; hI++) {
       var ht = Math.pow(Math.random(), 0.8);
       var ha = Math.random() * Math.PI * 2;
@@ -192,12 +198,15 @@
     var area = W * H;
     /* Plenty of small particles beats a few large ones: the arms only read
        as arms when the points stay points. */
-    var discCount = Math.round(clamp(area / 1400, 340, 1300));
-    var starCount = Math.round(clamp(area / 3400, 160, 620));
+    var discCount = Math.round(clamp(area / 1400, 460, 1300));
+    /* A phone has little viewport area, and the old ratio left the sky above
+       the galaxy almost bare, so the floor is high enough to keep stars in
+       it. They are the cheapest thing here to draw. */
+    var starCount = Math.round(clamp(area / 2400, 300, 640));
 
-    /* Size the disc so the whole object — core, arms and rim — lands inside
-       the viewport once projected, rather than running off every edge. */
-    R = Math.max(W, H) * 0.66 * (GALAXY_Z / FOCAL);
+    /* discRadius is where the rim should land on screen; convert it back
+       through the projection to get the disc's size in world units. */
+    R = discRadius * (GALAXY_Z / FOCAL);
 
     galaxy = new Array(discCount);
     for (var i = 0; i < discCount; i++) {
@@ -244,12 +253,15 @@
       };
     }
 
-    /* The texture is the expensive part of setup, so it is only repainted
-       when the viewport change is big enough to matter. */
-    var wantPx = Math.round(clamp(Math.max(W, H) * 1.1, 512, 1536));
-    if (!disc || Math.abs(wantPx - discPx) > 160) {
+    /* Match the texture to the size the disc is actually drawn at, so its
+       specks stay roughly one for one with screen pixels instead of being
+       scaled up into mush or down into flicker. It is the expensive part of
+       setup, so it is only repainted when the change is big enough to show. */
+    var wantPx = Math.round(clamp(discRadius * 2 * Math.min(dpr, 1.5), 512, 1536));
+    if (!disc || Math.abs(wantPx - discPx) > 160 || narrowView !== discNarrow) {
       discPx = wantPx;
-      disc = buildDisc(wantPx);
+      discNarrow = narrowView;
+      disc = buildDisc(wantPx, narrowView);
     }
 
     /* Field stars drift toward the camera and recycle out the back. */
@@ -294,9 +306,16 @@
     dpr = Math.min(window.devicePixelRatio || 1, w > 1400 ? 1.5 : 1.75);
 
     W = w; H = h; cx = w / 2; cy = h / 2;
-    var narrow = w < 720;
-    galX = narrow ? 0.3 : GAL_X;
-    galY = narrow ? -0.26 : GAL_Y;
+
+    /* A phone needs its own framing. Measured against the long side the disc
+       overflows so far that only a smear of its middle is ever on screen, so
+       here it is sized off the width and sits whole, below the hero buttons,
+       tipped a little more face-on so the spiral reads as a spiral. */
+    narrowView = w < 720;
+    galX = narrowView ? 0.04 : GAL_X;
+    galY = narrowView ? 0.18 : GAL_Y;
+    discTilt = narrowView ? 0.94 : TILT;
+    discRadius = narrowView ? w * 0.58 : Math.max(w, h) * 0.66;
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     canvas.style.width = w + "px";
@@ -357,7 +376,7 @@
     ctx.globalCompositeOperation = "lighter";
 
     /* Disc orientation: a fixed tilt, a slow drift, and the pointer's nudge. */
-    var tilt = TILT + cam.pitch + Math.sin(clock * 0.06) * 0.02;
+    var tilt = discTilt + cam.pitch + Math.sin(clock * 0.06) * 0.02;
     var yaw = cam.yaw + Math.sin(clock * 0.045) * 0.05;
     var cosT = Math.cos(tilt), sinT = Math.sin(tilt);
     var cosY = Math.cos(yaw), sinY = Math.sin(yaw);
@@ -440,7 +459,7 @@
       /* One texel of the texture spans this many screen pixels. */
       var texScale = (R / (discPx / 2 * 0.98)) * coreK;
 
-      ctx.globalAlpha = 0.95;
+      ctx.globalAlpha = narrowView ? 1 : 0.95;
       ctx.setTransform(
         m11 * texScale * dpr, m21 * texScale * dpr,
         m12 * texScale * dpr, m22 * texScale * dpr,
