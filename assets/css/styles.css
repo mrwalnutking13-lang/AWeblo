@@ -1055,14 +1055,15 @@ a.quick-action:active { background: rgba(255, 255, 255, 0.06); }
 }
 
 @media (max-width: 720px) {
-  /* On a phone the galaxy is small, sharp and sits in the open space below
-     the hero buttons rather than sprawling behind the text, so the veil can
-     ease off and let it show. */
+  /* On a phone the galaxy runs edge to edge behind everything, so the veil
+     works the way it does on desktop — a pool of shade under the headline,
+     heavier toward the bottom where the content gets dense — just gentler,
+     since a phone shows far less of the page at once. */
   .galaxy__veil {
     background:
-      radial-gradient(ellipse 72% 24% at 50% 17%, rgba(5, 5, 7, 0.4), transparent 78%),
-      linear-gradient(180deg, rgba(5, 5, 7, 0.36) 0%, rgba(5, 5, 7, 0.08) 24%, rgba(5, 5, 7, 0.24) 58%, rgba(5, 5, 7, 0.6) 100%),
-      radial-gradient(farthest-corner at 50% 45%, transparent 52%, rgba(2, 2, 4, 0.66) 100%);
+      radial-gradient(ellipse 78% 26% at 50% 22%, rgba(5, 5, 7, 0.52), rgba(5, 5, 7, 0.16) 64%, transparent 82%),
+      linear-gradient(180deg, rgba(5, 5, 7, 0.44) 0%, rgba(5, 5, 7, 0.14) 26%, rgba(5, 5, 7, 0.3) 60%, rgba(5, 5, 7, 0.62) 100%),
+      radial-gradient(farthest-corner at 50% 45%, transparent 50%, rgba(2, 2, 4, 0.66) 100%);
   }
 }
 

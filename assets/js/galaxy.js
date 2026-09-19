@@ -41,7 +41,7 @@
 
   var W = 0, H = 0, cx = 0, cy = 0, dpr = 1;
   var galaxy = [], stars = [], nebulae = [];
-  var disc = null, discPx = 0, discNarrow = false;
+  var disc = null, discPx = 0, discNarrow = false, discJob = null;
   var R = 1200;             /* disc radius in world units */
   var streak = null, nextStreak = 6;
 
@@ -119,8 +119,14 @@
      an offscreen canvas, and every frame maps that one image through the
      disc's rotation and tilt. The live particles layer on top for the
      genuine depth and twinkle.
+
+     Painting it in one go is a 200ms-plus task, which is a visible stall on
+     a phone right when the page is loading. So the work is handed back as a
+     list of small steps and spread over the next few frames instead; the
+     canvas is fading in over that time anyway, and on a resize the old
+     texture stays up until the new one is finished.
      ---------------------------------------------------------------------- */
-  function buildDisc(px, narrow) {
+  function planDisc(px, narrow) {
     var tex = document.createElement("canvas");
     tex.width = tex.height = px;
     var g = tex.getContext("2d");
@@ -128,23 +134,27 @@
     var unit = half * 0.98;        /* disc radius in texels */
     g.globalCompositeOperation = "lighter";
 
+    var steps = [];
+
     /* Nebulous wash, hugging the arms. It is the soft, smoky part, so on a
-       phone — where the disc is small and every pixel counts — there is much
-       less of it and the dust does the work instead. */
-    var clouds = Math.round(px / (narrow ? 18 : 9));
-    for (var c = 0; c < clouds; c++) {
-      var ct = Math.pow(Math.random(), 0.7);
-      var ca = armAngle(c, ct) + gauss() * 0.22;
-      var cr = unit * ct;
-      var csz = unit * (0.05 + Math.random() * 0.14);
-      g.globalAlpha = (narrow ? 0.03 : 0.04) + Math.random() * (narrow ? 0.04 : 0.06);
-      g.drawImage(
-        NEBULA_SPRITES[c % NEBULA_SPRITES.length],
-        half + Math.cos(ca) * cr - csz,
-        half + Math.sin(ca) * cr - csz,
-        csz * 2, csz * 2
-      );
-    }
+       phone — where every pixel counts — there is much less of it and the
+       dust does the work instead. */
+    steps.push(function () {
+      var clouds = Math.round(px / (narrow ? 18 : 9));
+      for (var c = 0; c < clouds; c++) {
+        var ct = Math.pow(Math.random(), 0.7);
+        var ca = armAngle(c, ct) + gauss() * 0.22;
+        var cr = unit * ct;
+        var csz = unit * (0.05 + Math.random() * 0.14);
+        g.globalAlpha = (narrow ? 0.03 : 0.04) + Math.random() * (narrow ? 0.04 : 0.06);
+        g.drawImage(
+          NEBULA_SPRITES[c % NEBULA_SPRITES.length],
+          half + Math.cos(ca) * cr - csz,
+          half + Math.sin(ca) * cr - csz,
+          csz * 2, csz * 2
+        );
+      }
+    });
 
     /* Dust. Grouped into colour passes so fillStyle is set a handful of
        times rather than once per speck. */
@@ -155,42 +165,70 @@
       { color: "rgba(112, 62, 232, 0.36)", share: 0.24, spread: 1.4 },
       { color: "rgba(198, 104, 255, 0.3)", share: 0.08, spread: 1.25 }
     ];
-    var total = Math.round(px * (narrow ? 26 : 18));
+    var total = Math.round(px * (narrow ? 30 : 18));
+
+    var dustStep = function (pass, count) {
+      return function () {
+        g.fillStyle = pass.color;
+        g.globalAlpha = 1;
+        for (var d = 0; d < count; d++) {
+          var t = Math.pow(Math.random(), 0.58);
+          var a = armAngle(d, t) + gauss() * 0.1 * pass.spread;
+          var r = unit * t * (1 + gauss() * 0.03);
+          var sz = Math.random() < 0.82 ? 1 : 2;
+          g.fillRect(half + Math.cos(a) * r, half + Math.sin(a) * r, sz, sz);
+        }
+      };
+    };
+
     for (var pIdx = 0; pIdx < passes.length; pIdx++) {
-      var pass = passes[pIdx];
-      g.fillStyle = pass.color;
-      g.globalAlpha = 1;
-      var n = Math.round(total * pass.share);
-      for (var d = 0; d < n; d++) {
-        var t = Math.pow(Math.random(), 0.58);
-        var a = armAngle(d, t) + gauss() * 0.1 * pass.spread;
-        var r = unit * t * (1 + gauss() * 0.03);
-        var sz = Math.random() < 0.82 ? 1 : 2;
-        g.fillRect(
-          half + Math.cos(a) * r,
-          half + Math.sin(a) * r,
-          sz, sz
-        );
+      var n = Math.round(total * passes[pIdx].share);
+      for (var done = 0; done < n; done += 3000) {
+        steps.push(dustStep(passes[pIdx], Math.min(3000, n - done)));
       }
     }
 
     /* Inter-arm haze so the gaps between the arms aren't bare. */
-    g.fillStyle = "rgba(124, 77, 255, 0.13)";
     var haze = Math.round(px * (narrow ? 1.6 : 3.5));
-    for (var hI = 0; hI < haze; hI++) {
-      var ht = Math.pow(Math.random(), 0.8);
-      var ha = Math.random() * Math.PI * 2;
-      g.fillRect(half + Math.cos(ha) * unit * ht, half + Math.sin(ha) * unit * ht, 1, 1);
-    }
+    var hazeStep = function (count) {
+      return function () {
+        g.fillStyle = "rgba(124, 77, 255, 0.13)";
+        g.globalAlpha = 1;
+        for (var i = 0; i < count; i++) {
+          var ht = Math.pow(Math.random(), 0.8);
+          var ha = Math.random() * Math.PI * 2;
+          g.fillRect(half + Math.cos(ha) * unit * ht, half + Math.sin(ha) * unit * ht, 1, 1);
+        }
+      };
+    };
+    for (var h = 0; h < haze; h += 3000) steps.push(hazeStep(Math.min(3000, haze - h)));
 
     /* Bulge. */
-    var bulge = unit * 0.28;
-    g.globalAlpha = 0.34;
-    g.drawImage(CORE_GLOW, half - bulge, half - bulge, bulge * 2, bulge * 2);
+    steps.push(function () {
+      var bulge = unit * 0.28;
+      g.globalAlpha = narrow ? 0.3 : 0.34;
+      g.drawImage(CORE_GLOW, half - bulge, half - bulge, bulge * 2, bulge * 2);
+      g.globalAlpha = 1;
+      g.globalCompositeOperation = "source-over";
+    });
 
-    g.globalAlpha = 1;
-    g.globalCompositeOperation = "source-over";
-    return tex;
+    return { canvas: tex, steps: steps, at: 0 };
+  }
+
+  /* Runs the pending texture build. With a frame budget it spreads over
+     several frames; with none it finishes the whole thing at once, which is
+     what the reduced-motion path needs since it only ever paints once. */
+  function advanceDisc(budgetMs) {
+    if (!discJob) return;
+    var deadline = budgetMs ? nowMs() + budgetMs : 0;
+    while (discJob.at < discJob.steps.length) {
+      discJob.steps[discJob.at++]();
+      if (deadline && nowMs() >= deadline) break;
+    }
+    if (discJob.at >= discJob.steps.length) {
+      disc = discJob.canvas;
+      discJob = null;
+    }
   }
 
   /* ---- Scene construction ------------------------------------------------ */
@@ -198,7 +236,10 @@
     var area = W * H;
     /* Plenty of small particles beats a few large ones: the arms only read
        as arms when the points stay points. */
-    var discCount = Math.round(clamp(area / 1400, 460, 1300));
+    /* The phone floor is high for the viewport area because the disc covers
+       far more than the viewport there — the count follows the disc, not the
+       window. */
+    var discCount = Math.round(clamp(area / 1400, narrowView ? 680 : 460, 1300));
     /* A phone has little viewport area, and the old ratio left the sky above
        the galaxy almost bare, so the floor is high enough to keep stars in
        it. They are the cheapest thing here to draw. */
@@ -257,11 +298,12 @@
        specks stay roughly one for one with screen pixels instead of being
        scaled up into mush or down into flicker. It is the expensive part of
        setup, so it is only repainted when the change is big enough to show. */
-    var wantPx = Math.round(clamp(discRadius * 2 * Math.min(dpr, 1.5), 512, 1536));
-    if (!disc || Math.abs(wantPx - discPx) > 160 || narrowView !== discNarrow) {
+    var wantPx = Math.round(clamp(discRadius * 2 * Math.min(dpr, 1.5), 512, narrowView ? 1792 : 2048));
+    if ((!disc && !discJob) || Math.abs(wantPx - discPx) > 160 || narrowView !== discNarrow) {
       discPx = wantPx;
       discNarrow = narrowView;
-      disc = buildDisc(wantPx, narrowView);
+      discJob = planDisc(wantPx, narrowView);
+      if (reduceMotion) advanceDisc(0);
     }
 
     /* Field stars drift toward the camera and recycle out the back. */
@@ -302,20 +344,25 @@
   function resize() {
     var w = window.innerWidth;
     var h = window.innerHeight;
-    /* Cap the pixel ratio: a 3x buffer on a phone costs far more than it adds. */
-    dpr = Math.min(window.devicePixelRatio || 1, w > 1400 ? 1.5 : 1.75);
+    /* Cap the pixel ratio — a full 3x buffer costs far more than it adds —
+       but not so hard that the sky goes soft on a phone screen, where the
+       backdrop now fills the whole viewport. */
+    dpr = Math.min(window.devicePixelRatio || 1, w > 1400 ? 1.5 : 2);
 
     W = w; H = h; cx = w / 2; cy = h / 2;
 
-    /* A phone needs its own framing. Measured against the long side the disc
-       overflows so far that only a smear of its middle is ever on screen, so
-       here it is sized off the width and sits whole, below the hero buttons,
-       tipped a little more face-on so the spiral reads as a spiral. */
+    /* A phone needs its own framing. A tall narrow screen can only be filled
+       edge to edge by a disc far wider than it is, so on a phone the disc is
+       sized to reach past the top and bottom and is tipped much more face-on
+       — round enough that the vertical squash still covers the screen, and
+       the arms sweep off the sides the way a backdrop should. The core sits
+       just off centre so the headline lands on an arm rather than on the
+       nucleus. */
     narrowView = w < 720;
-    galX = narrowView ? 0.04 : GAL_X;
-    galY = narrowView ? 0.18 : GAL_Y;
-    discTilt = narrowView ? 0.94 : TILT;
-    discRadius = narrowView ? w * 0.58 : Math.max(w, h) * 0.66;
+    galX = narrowView ? 0.14 : GAL_X;
+    galY = narrowView ? -0.1 : GAL_Y;
+    discTilt = narrowView ? 0.8 : TILT;
+    discRadius = Math.max(w, h) * (narrowView ? 0.72 : 0.66);
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     canvas.style.width = w + "px";
@@ -457,7 +504,7 @@
       var m21 = sinR * a11 + cosR * a21;
       var m22 = sinR * a12 + cosR * a22;
       /* One texel of the texture spans this many screen pixels. */
-      var texScale = (R / (discPx / 2 * 0.98)) * coreK;
+      var texScale = (R / (disc.width / 2 * 0.98)) * coreK;
 
       ctx.globalAlpha = narrowView ? 1 : 0.95;
       ctx.setTransform(
@@ -465,7 +512,7 @@
         m12 * texScale * dpr, m22 * texScale * dpr,
         coreX * dpr, coreY * dpr
       );
-      ctx.drawImage(disc, -discPx / 2, -discPx / 2);
+      ctx.drawImage(disc, -disc.width / 2, -disc.height / 2);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
@@ -482,15 +529,19 @@
 
     /* --- Galactic core: a wide halo plus a tight, brighter heart --- */
     if (haveCore) {
+      /* On a phone the core takes up a far larger share of the screen, so it
+         burns at a little over half strength — measured against the hero
+         copy, the desktop brightness washes the text out there. */
+      var gain = narrowView ? 0.85 : 1;
       var halo = R * 0.4 * coreK;
-      ctx.globalAlpha = 0.16;
+      ctx.globalAlpha = 0.16 * gain;
       ctx.drawImage(CORE_GLOW, coreX - halo, coreY - halo, halo * 2, halo * 2);
       var heart = R * 0.07 * coreK;
-      ctx.globalAlpha = 0.3 + Math.sin(clock * 0.5) * 0.04;
+      ctx.globalAlpha = (0.3 + Math.sin(clock * 0.5) * 0.04) * gain;
       ctx.drawImage(CORE_GLOW, coreX - heart, coreY - heart, heart * 2, heart * 2);
       /* A small hot point stops the nucleus reading as a soft smudge. */
       var nucleus = R * 0.013 * coreK;
-      ctx.globalAlpha = 0.55;
+      ctx.globalAlpha = 0.55 * gain;
       ctx.drawImage(PALETTE[1], coreX - nucleus, coreY - nucleus, nucleus * 2, nucleus * 2);
     }
 
@@ -564,6 +615,9 @@
        galaxy resumes where it was rather than jumping a minute forward. */
     if (!(dt > 0)) return;
     if (dt > 0.05) dt = 0.05;
+
+    /* Keep any pending texture build ticking over, a slice at a time. */
+    advanceDisc(5);
 
     draw(dt);
 
