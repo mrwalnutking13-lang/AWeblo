@@ -8,6 +8,7 @@ Open `index.html` and it runs.
 index.html                 the whole page
 assets/css/styles.css      design tokens + all styles
 assets/js/main.js          nav, scroll reveals, FAQ, form handling
+assets/js/galaxy.js        the 3D galaxy backdrop
 assets/img/logo.png        the AWeblo logo  (upload this — see below)
 ```
 
@@ -71,6 +72,28 @@ search for `302-353-6328` to catch them all. Same for `averytownsend95@gmail.com
 
 Colors, fonts and spacing are all CSS custom properties at the top of `styles.css` under
 `:root` — change `--brand` and the whole site follows.
+
+## The galaxy backdrop
+
+The purple-and-black sky behind the page is a spiral galaxy drawn in perspective on a
+canvas: a starfield you drift through, a tilted disc that turns, and a nucleus that sits
+off to one side of the headline. It parallaxes with the pointer and pans as you scroll.
+
+Everything is in `assets/js/galaxy.js`, and the layers sit behind the content in
+`styles.css` under *Galaxy backdrop*:
+
+- `.galaxy__canvas` — the animated sky
+- `.galaxy__fallback` — a still CSS version, shown only if the script never runs
+- `.galaxy__veil` — the dark wash that keeps text contrast up over the sky
+
+The constants at the top of `galaxy.js` are the dials worth touching: `TILT` (how far the
+disc tips), `ARMS` and `SWIRL` (the spiral shape), `SPIN` (rotation speed), and
+`GAL_X` / `GAL_Y` (where the core sits, as a fraction of the viewport). If you want the
+sky darker or lighter behind the copy, adjust `.galaxy__veil` rather than the script.
+
+Particle counts scale with the window, the pixel ratio is capped, the loop stops while the
+tab is in the background, and detail is trimmed automatically if frames start running
+long. With `prefers-reduced-motion` set, one still frame is painted and nothing moves.
 
 ## Deploying
 

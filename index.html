@@ -22,6 +22,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/styles.css">
 
+<!-- Scroll reveals are opacity-0 until the script marks them in; without
+     JavaScript there is no script to do it, so show everything up front. -->
+<noscript>
+  <style>[data-reveal] { opacity: 1; translate: none; }</style>
+</noscript>
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -40,6 +46,17 @@
 
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ============================ GALAXY BACKDROP ============================
+     Decorative only. The canvas is painted by assets/js/galaxy.js; with
+     JavaScript off (or blocked) the CSS fallback layer holds the same look,
+     just still.
+     ======================================================================= -->
+<div class="galaxy" aria-hidden="true">
+  <canvas class="galaxy__canvas" id="galaxy-canvas"></canvas>
+  <div class="galaxy__fallback"></div>
+  <div class="galaxy__veil"></div>
+</div>
 
 <!-- ============================ HEADER ============================ -->
 <header class="site-header">
@@ -435,6 +452,7 @@ Every site is quoted individually. Here's the honest range.
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
 
+<script src="assets/js/galaxy.js" defer></script>
 <script src="assets/js/main.js" defer></script>
 </body>
 </html>
